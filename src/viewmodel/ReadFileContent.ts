@@ -38,10 +38,10 @@ async function readPngContent(file: File): Promise<FileContent> {
     const buffer = await file.arrayBuffer()
     const uint8Array = new Uint8Array(buffer)
 
-    let decodedJson
+    let decodedJson: string | null
     try {
         const encodedJson = getMetadata(uint8Array, "chara")
-        decodedJson = Base64.decode(encodedJson)
+        decodedJson = JSON.stringify(JSON.parse(Base64.decode(encodedJson)), null, 2)
     } catch (e) {
         decodedJson = null
     }
