@@ -18,10 +18,10 @@ export class ViewModel {
         baseURL: "",
         apiKey: "",
         model: "",
-        prompt: "",
     })
 
-    async loadFile(file: File, loadFileType: LoadFileType) {
+    async loadFile(files: File[] | File, loadFileType: LoadFileType) {
+        const file = Array.isArray(files) ? files[0] : files
         if (!isValidFile(file, loadFileType)) {
             this.snackbarMessage.emit("Illegal File")
             return
@@ -48,13 +48,13 @@ export class ViewModel {
             this.snackbarMessage.emit("Nothing to translate")
             return
         }
-        this.loading = true
+        this.loading.value = true
         this.translatedJson.value = ""
         const stream = await fetchCompletionResponse(this.apiConfig.value, this.rawJson.value, this.prompt.value)
         for await (const event of stream) {
             this.translatedJson.value += event.choices[0].delta.content
         }
-        this.loading = false
+        this.loading.value = false
     }
 
     clearImage() {
@@ -67,11 +67,11 @@ export class ViewModel {
     }
 
     downloadJson() {
-        downloadJsonFile(this.translatedJson.value)
+        downloadJsonFile(this.translatedJson.value, "translated.json")
     }
 
     downloadImage() {
-        downloadImageFile(this.translatedJson.value, this.image.value)
+        downloadImageFile(this.translatedJson.value, this.image.value, "translated.png")
     }
 
     openBugReport() {
