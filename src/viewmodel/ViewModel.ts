@@ -3,27 +3,39 @@ import {isValidFile, LoadFileType, readFileContent} from "@/viewmodel/ReadFileCo
 import {SingleShotEvent} from "@/viewmodel/SingleShotEvent.ts";
 import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts";
 import {APIConfigModel, fetchCompletionResponse} from "@/viewmodel/Translation.ts";
-import {ref} from "vue";
+import {computed, ref} from "vue";
 
 export class ViewModel {
     image = useLocalStorage("raw-image", "")
+    imageSrc = computed(() => {
+        const encodedImage = this.image.value
+        if (!encodedImage) return ''
+        return `data:image/png;base64,${encodedImage}`
+    })
+
     rawJson = useLocalStorage("raw-json", "")
     prompt = useLocalStorage("translation-prompt", "")
     translatedJson = useLocalStorage("translated-json", "")
-
-    snackbarMessage = new SingleShotEvent<string>()
-    loading = ref(false)
-    darkTheme = useLocalStorage("app-dark-theme", true)
     apiConfig = useLocalStorage<APIConfigModel>("api-config", {
         baseURL: "",
         apiKey: "",
         model: "",
     })
 
+    snackbarMessages = ref<string[]>([])
+    loading = ref(false)
+    darkTheme = useLocalStorage("app-dark-theme", true)
+    theme = computed(() => {
+        return this.darkTheme.value ? 'dark' : 'light'
+    })
+    toggleThemeIcon = computed(() => {
+        return this.darkTheme.value ? 'md:light_mode' : 'md:dark_mode'
+    })
+
     async loadFile(files: File[] | File, loadFileType: LoadFileType) {
         const file = Array.isArray(files) ? files[0] : files
         if (!isValidFile(file, loadFileType)) {
-            this.snackbarMessage.emit("Illegal File")
+            this.snackbarMessages.value.push("Illegal File")
             return
         }
         const {json, png} = await readFileContent(file)
@@ -45,7 +57,7 @@ export class ViewModel {
 
     async translate() {
         if (this.rawJson.value === "") {
-            this.snackbarMessage.emit("Nothing to translate")
+            this.snackbarMessages.value.push("Nothing to translate")
             return
         }
         this.loading.value = true
