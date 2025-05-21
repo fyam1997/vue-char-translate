@@ -49,12 +49,9 @@ export class ViewModel {
                 this.setRawJson(json)
                 break
             case LoadFileType.PNG:
-                this.image.value = png
-                break
-            case LoadFileType.BOTH:
             default:
-                this.setRawJson(json)
                 this.image.value = png
+                this.setRawJson(json)
                 break
         }
     }

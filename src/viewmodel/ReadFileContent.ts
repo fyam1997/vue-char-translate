@@ -17,10 +17,8 @@ function getAllowedTypes(loadFileType: LoadFileType): string[] {
         case LoadFileType.JSON:
             return ['application/json'];
         case LoadFileType.PNG:
-            return ['image/png'];
-        case LoadFileType.BOTH:
         default:
-            return ['application/json', 'image/png'];
+            return ['image/png'];
     }
 }
 
@@ -55,7 +53,6 @@ async function readPngContent(file: File): Promise<FileContent> {
 export enum LoadFileType {
     JSON,
     PNG,
-    BOTH,
 }
 
 interface FileContent {

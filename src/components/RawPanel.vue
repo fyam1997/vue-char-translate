@@ -18,7 +18,7 @@ const rawJson = viewModel.rawJson
     <FileZone
         accept="image/png"
         class="pa-4"
-        @onFileSelected="(file)=>viewModel.loadFile(file, LoadFileType.BOTH)"
+        @onFileSelected="(file)=>viewModel.loadFile(file, LoadFileType.PNG)"
     >
       <template v-slot:default="{openFile}">
         <div class="pb-4 d-flex flex-row align-center">
@@ -42,7 +42,7 @@ const rawJson = viewModel.rawJson
     <FileZone
         accept="application/json"
         class="pa-4"
-        @onFileSelected="(file)=>viewModel.loadFile(file, LoadFileType.BOTH)"
+        @onFileSelected="(file)=>viewModel.loadFile(file, LoadFileType.JSON)"
     >
       <template v-slot:default="{openFile}">
         <div class="pb-4 d-flex flex-row align-center">
