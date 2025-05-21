@@ -3,7 +3,7 @@ import {isValidFile, LoadFileType, readFileContent} from "@/viewmodel/ReadFileCo
 import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts";
 import {APIConfigModel, fetchCompletionResponse} from "@/viewmodel/Translation.ts";
 import {computed, ref} from "vue";
-import {parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
+import {getFlattenArray, parseJsonOrNull, setValueByFlattenKey} from "@/viewmodel/JsonUtils.ts";
 
 export class ViewModel {
     image = useLocalStorage("raw-image", "")
@@ -21,6 +21,9 @@ export class ViewModel {
     })
 
     rawJson = useLocalStorage<object>("raw-json", {})
+    flattenRawJson = computed(() => {
+        return getFlattenArray(this.rawJson.value)
+    })
     translatedJson = useLocalStorage<object>("translated-json", {})
 
     snackbarMessages = ref<string[]>([])
@@ -58,6 +61,10 @@ export class ViewModel {
 
     setRawJson(obj: object) {
         this.rawJson.value = obj
+    }
+
+    setRawJsonValue(key: string, value: any) {
+        setValueByFlattenKey(this.rawJson.value, key, value)
     }
 
     setTranslatedJson(obj: object) {

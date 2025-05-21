@@ -49,8 +49,16 @@ const rawJson = viewModel.rawJson
           <h4>Json</h4>
           <v-spacer/>
           <EditObjectDialog :obj="rawJson" @save="obj=>viewModel.setRawJson(obj)"/>
-          <v-icon-btn v-if="rawJson"  icon="md:delete" variant="plain" @click="viewModel.clearJson()" title="Delete"/>
+          <v-icon-btn v-if="rawJson" icon="md:delete" variant="plain" @click="viewModel.clearJson()" title="Delete"/>
           <v-icon-btn icon="md:upload" variant="plain" @click="openFile" title="Upload"/>
+        </div>
+        <div v-for="item in viewModel.flattenRawJson.value">
+          <v-textarea
+              v-model:model-value="item.value"
+              @update:modelValue="v=>viewModel.setRawJsonValue(item.key, v)"
+              :label="item.key"
+              auto-grow rows="1"
+          />
         </div>
       </template>
     </FileZone>
