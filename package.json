@@ -1,6 +1,6 @@
 {
   "name": "vue_studies",
-  "version": "0.1.5",
+  "version": "0.1.6-dev",
   "private": true,
   "type": "module",
   "scripts": {
