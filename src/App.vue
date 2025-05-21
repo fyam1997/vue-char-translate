@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ViewModel} from "@/viewmodel/ViewModel.ts";
-import {computed, onMounted, provide, ref} from "vue";
+import {computed, onMounted, provide, ref, watch} from "vue";
 import ConfigPanel from "@/components/ConfigPanel.vue";
 import RawPanel from "@/components/RawPanel.vue";
 import ResultPanel from "@/components/ResultPanel.vue";
@@ -17,6 +17,16 @@ const screenWidth = useWindowSize().width
 const largeScreen = computed(() => screenWidth.value >= 950)
 const tab = ref("raw-panel")
 
+const shouldShowTranslated = computed(() => {
+  return viewModel.loading.value || !viewModel.translatedJson.isEmpty()
+})
+
+watch(viewModel.loading, (after, before) => {
+  if (!before && after) {
+    tab.value = "translated-panel"
+  }
+})
+
 </script>
 
 <template>
@@ -31,7 +41,7 @@ const tab = ref("raw-panel")
         >
           <v-tab value="config-panel" class="text-none">Config</v-tab>
           <v-tab value="raw-panel" class="text-none">Raw</v-tab>
-          <v-tab value="translated-panel" class="text-none">Translated</v-tab>
+          <v-tab v-if="shouldShowTranslated" value="translated-panel" class="text-none">Translated</v-tab>
         </v-tabs>
       </div>
       <v-divider/>
@@ -44,7 +54,7 @@ const tab = ref("raw-panel")
           <RawPanel/>
         </v-tabs-window-item>
 
-        <v-tabs-window-item value="translated-panel" class="h-100">
+        <v-tabs-window-item v-if="shouldShowTranslated" value="translated-panel" class="h-100">
           <ResultPanel/>
         </v-tabs-window-item>
       </v-tabs-window>
@@ -54,8 +64,8 @@ const tab = ref("raw-panel")
       <ConfigPanel class="config-panel-large flex-grow-0"/>
       <v-divider vertical class="mt-4 mb-4"/>
       <RawPanel class="content-panel-large flex-grow-1"/>
-      <v-divider vertical class="mt-4 mb-4"/>
-      <ResultPanel class="content-panel-large flex-grow-1"/>
+      <v-divider v-if="shouldShowTranslated" vertical class="mt-4 mb-4"/>
+      <ResultPanel v-if="shouldShowTranslated" class="content-panel-large flex-grow-1"/>
     </div>
   </v-app>
 </template>

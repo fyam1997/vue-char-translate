@@ -15,7 +15,11 @@ const translatedJson = viewModel.translatedJson
       <div class="pb-4 d-flex flex-row align-center">
         <h4>Translated</h4>
         <v-spacer/>
-        <EditObjectDialog :obj="translatedJson.getSrcValue()" @save="obj=>viewModel.setTranslatedJson(obj)"/>
+        <EditObjectDialog
+            v-if="!viewModel.loading.value"
+            :obj="translatedJson.getSrcValue()"
+            @save="obj=>viewModel.setTranslatedJson(obj)"
+        />
       </div>
       <div class="text-caption text-disabled">{{ viewModel.loadingText.value }}</div>
       <FlattenJsonList :flatten-json="viewModel.translatedJson"/>
@@ -23,8 +27,11 @@ const translatedJson = viewModel.translatedJson
     <v-divider/>
     <div class="d-flex flex-row ga-2 ma-4">
       <v-btn @click="viewModel.downloadJson()" prepend-icon="md:download" text="Json"
+             :loading="viewModel.loading.value"
              class="text-none flex-grow-1" variant="outlined"/>
       <v-btn @click="viewModel.downloadImage()" prepend-icon="md:download" text="Image"
+             :loading="viewModel.loading.value"
+             :disabled="!viewModel.image.value"
              class="text-none flex-grow-1" variant="outlined"/>
     </div>
   </div>
