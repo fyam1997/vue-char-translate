@@ -6,8 +6,7 @@ export function downloadJsonFile(json: object, fileName: string) {
     downloadBlob(blob, fileName)
 }
 
-export function downloadImageFile(json: object, base64Image: string, fileName: string) {
-    const imageArr = Base64.toUint8Array(base64Image)
+export function downloadImageFile(json: object, imageArr: Uint8Array, fileName: string) {
     const compactJson = JSON.stringify(json)
     const charaData = Base64.encode(compactJson)
     const embeddedImageArr = addMetadata(imageArr, "chara", charaData)

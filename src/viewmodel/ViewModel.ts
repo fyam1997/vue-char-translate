@@ -6,11 +6,12 @@ import {computed, ref} from "vue";
 import {getFlattenArray, isEmpty, parseJsonOrNull, setValueByFlattenKey} from "@/viewmodel/JsonUtils.ts";
 
 export class ViewModel {
-    image = useLocalStorage("raw-image", "")
+    // TODO local storage is too small for image, try indexed db
+    image = ref<Uint8Array>(null)
     imageSrc = computed(() => {
-        const encodedImage = this.image.value
-        if (!encodedImage) return ''
-        return `data:image/png;base64,${encodedImage}`
+        if (!this.image.value) return null
+        const blob = new Blob([this.image.value], {type: "image/png"})
+        return URL.createObjectURL(blob)
     })
 
     prompt = useLocalStorage("translation-prompt", "")
@@ -85,7 +86,7 @@ export class ViewModel {
 
     clearImage() {
         if (confirm('Clear Image?')) {
-            this.image.value = ""
+            this.image.value = null
         }
     }
 

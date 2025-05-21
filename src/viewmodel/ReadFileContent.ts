@@ -6,7 +6,7 @@ export function isValidFile(file: File, loadFileType: LoadFileType): boolean {
     const allowedTypes = getAllowedTypes(loadFileType)
     const fileTypeValid = allowedTypes.includes(file.type)
 
-    const maxSizeInMB = 10
+    const maxSizeInMB = 20
     const fileSizeValid = file.size <= maxSizeInMB * 1024 * 1024
 
     return fileTypeValid && fileSizeValid
@@ -46,7 +46,7 @@ async function readPngContent(file: File): Promise<FileContent> {
     }
     return {
         json: parseJsonOrNull(decodedJson),
-        png: Base64.fromUint8Array(uint8Array),
+        png: uint8Array,
     }
 }
 
@@ -56,6 +56,6 @@ export enum LoadFileType {
 }
 
 interface FileContent {
-    png: string | null
+    png: Uint8Array | null
     json: object | null
 }
