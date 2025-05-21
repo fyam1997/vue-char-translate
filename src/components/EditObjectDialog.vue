@@ -3,7 +3,7 @@ import {ref, watch} from 'vue'
 import {parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
 
 const props = defineProps<{
-  text: string
+  obj: object
 }>()
 
 const emits = defineEmits<{
@@ -20,17 +20,21 @@ function save() {
   if (result) {
     emits('save', result)
     showDialog.value = false
-  }else{
+  } else {
     errorMsg.value = "Invalid JSON!"
   }
 }
 
 function openDialog() {
-  editText.value = props.text
+  if (props.obj) {
+    editText.value = JSON.stringify(props.obj, null, 2)
+  } else {
+    editText.value = ""
+  }
   showDialog.value = true
 }
 
-watch(editText, ()=>{
+watch(editText, () => {
   errorMsg.value = ""
 })
 

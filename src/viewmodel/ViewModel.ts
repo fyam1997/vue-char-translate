@@ -1,9 +1,9 @@
 import {useLocalStorage} from "@vueuse/core";
 import {isValidFile, LoadFileType, readFileContent} from "@/viewmodel/ReadFileContent.ts";
-import {SingleShotEvent} from "@/viewmodel/SingleShotEvent.ts";
 import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts";
 import {APIConfigModel, fetchCompletionResponse} from "@/viewmodel/Translation.ts";
 import {computed, ref} from "vue";
+import {parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
 
 export class ViewModel {
     image = useLocalStorage("raw-image", "")
@@ -13,14 +13,15 @@ export class ViewModel {
         return `data:image/png;base64,${encodedImage}`
     })
 
-    rawJson = useLocalStorage("raw-json", "")
     prompt = useLocalStorage("translation-prompt", "")
-    translatedJson = useLocalStorage("translated-json", "")
     apiConfig = useLocalStorage<APIConfigModel>("api-config", {
         baseURL: "",
         apiKey: "",
         model: "",
     })
+
+    rawJson = useLocalStorage<object>("raw-json", {})
+    translatedJson = useLocalStorage<object>("translated-json", {})
 
     snackbarMessages = ref<string[]>([])
     loading = ref(false)
@@ -56,24 +57,25 @@ export class ViewModel {
     }
 
     setRawJson(obj: object) {
-        this.rawJson.value = JSON.stringify(obj, null, 2)
+        this.rawJson.value = obj
     }
 
     setTranslatedJson(obj: object) {
-        this.translatedJson.value = JSON.stringify(obj, null, 2)
+        this.translatedJson.value = obj
     }
 
     async translate() {
-        if (this.rawJson.value === "") {
+        if (Object.keys(this.rawJson.value).length === 0) {
             this.snackbarMessages.value.push("Nothing to translate")
             return
         }
         this.loading.value = true
-        this.translatedJson.value = ""
+        let text = ""
         const stream = await fetchCompletionResponse(this.apiConfig.value, this.rawJson.value, this.prompt.value)
         for await (const event of stream) {
-            this.translatedJson.value += event.choices[0].delta.content
+            text += event.choices[0].delta.content
         }
+        this.setTranslatedJson(parseJsonOrNull(text))
         this.loading.value = false
     }
 
@@ -82,8 +84,8 @@ export class ViewModel {
     }
 
     clearJson() {
-        this.rawJson.value = ""
-        this.translatedJson.value = ""
+        this.rawJson.value = null
+        this.translatedJson.value = null
     }
 
     downloadJson() {

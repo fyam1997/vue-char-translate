@@ -48,8 +48,8 @@ const rawJson = viewModel.rawJson
         <div class="pb-4 d-flex flex-row align-center">
           <h4>Json</h4>
           <v-spacer/>
-          <EditObjectDialog :text="rawJson" @save="obj=>viewModel.setRawJson(obj)"/>
-          <v-icon-btn icon="md:delete" variant="plain" @click="viewModel.clearJson()" title="Delete"/>
+          <EditObjectDialog :obj="rawJson" @save="obj=>viewModel.setRawJson(obj)"/>
+          <v-icon-btn v-if="rawJson"  icon="md:delete" variant="plain" @click="viewModel.clearJson()" title="Delete"/>
           <v-icon-btn icon="md:upload" variant="plain" @click="openFile" title="Upload"/>
         </div>
       </template>
