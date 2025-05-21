@@ -2,6 +2,7 @@
 import {inject} from "vue";
 import {ViewModel} from "@/viewmodel/ViewModel.ts";
 import EditObjectDialog from "@/components/EditObjectDialog.vue";
+import FlattenJsonList from "@/components/FlattenJsonList.vue";
 
 const viewModel = inject<ViewModel>("viewModel")
 const translatedJson = viewModel.translatedJson
@@ -14,8 +15,9 @@ const translatedJson = viewModel.translatedJson
       <div class="pb-4 d-flex flex-row align-center">
         <h4>Translated</h4>
         <v-spacer/>
-        <EditObjectDialog :obj="translatedJson" @save="obj=>viewModel.setTranslatedJson(obj)"/>
+        <EditObjectDialog :obj="translatedJson.getSrcValue()" @save="obj=>viewModel.setTranslatedJson(obj)"/>
       </div>
+      <FlattenJsonList :flatten-json="viewModel.translatedJson"/>
     </div>
     <v-divider/>
     <div class="d-flex flex-row ga-2 ma-4">

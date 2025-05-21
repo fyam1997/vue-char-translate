@@ -1,3 +1,5 @@
+import {computed, Ref} from "vue";
+
 export function getFlattenArray(json: object): { key: string; value: string }[] {
     const flattenArray: { key: string; value: string }[] = []
     const flatten = (obj: any, parentKey: string = "") => {
@@ -6,7 +8,7 @@ export function getFlattenArray(json: object): { key: string; value: string }[] 
             if (typeof obj[key] === "object" && obj[key] !== null) {
                 flatten(obj[key], newKey)
             } else {
-                flattenArray.push({ key: newKey, value: obj[key] })
+                flattenArray.push({key: newKey, value: obj[key]})
             }
         }
     }
@@ -36,6 +38,32 @@ export function parseJsonOrNull(text: string): object {
     }
 }
 
-export function isEmpty(json: object): boolean {
-    return !Object.keys(json).length
+export class FlattenJson {
+    src: Ref<object>
+    flattenArray = computed(() => {
+        return getFlattenArray(this.src.value)
+    })
+    empty = computed(() => {
+        return this.flattenArray.value.length == 0
+    })
+
+    constructor(src: Ref<object>) {
+        this.src = src
+    }
+
+    setSrcValue(value: object) {
+        this.src.value = value
+    }
+
+    getSrcValue(): object {
+        return this.src.value
+    }
+
+    setValue(flattenKey: string, value: any) {
+        setValueByFlattenKey(this.src.value, flattenKey, value)
+    }
+
+    isEmpty() {
+        return this.empty.value
+    }
 }

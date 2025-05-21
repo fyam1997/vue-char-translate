@@ -3,7 +3,7 @@ import {isValidFile, LoadFileType, readFileContent} from "@/viewmodel/ReadFileCo
 import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts";
 import {APIConfigModel, fetchCompletionResponse} from "@/viewmodel/Translation.ts";
 import {computed, ref} from "vue";
-import {getFlattenArray, isEmpty, parseJsonOrNull, setValueByFlattenKey} from "@/viewmodel/JsonUtils.ts";
+import {FlattenJson, parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
 import {loadImage, saveImage} from "@/viewmodel/ImageCache.ts";
 
 export class ViewModel {
@@ -21,14 +21,8 @@ export class ViewModel {
         model: "",
     })
 
-    rawJson = useLocalStorage<object>("raw-json", {})
-    flattenRawJson = computed(() => {
-        return getFlattenArray(this.rawJson.value)
-    })
-    rawJsonEmpty = computed(() => {
-        return isEmpty(this.rawJson.value)
-    })
-    translatedJson = useLocalStorage<object>("translated-json", {})
+    rawJson = new FlattenJson(useLocalStorage<object>("raw-json", {}))
+    translatedJson = new FlattenJson(useLocalStorage<object>("translated-json", {}))
 
     snackbarMessages = ref<string[]>([])
     loading = ref(false)
@@ -57,31 +51,31 @@ export class ViewModel {
             this.image.value = png
             await saveImage(png)
         }
-        if (json && (this.rawJsonEmpty.value || confirm("Replace Character Spec Json?"))) {
+        if (json && (this.rawJson.isEmpty() || confirm("Replace Character Spec Json?"))) {
             this.setRawJson(json)
         }
     }
 
     setRawJson(obj: object) {
-        this.rawJson.value = obj
-    }
-
-    setRawJsonValue(key: string, value: any) {
-        setValueByFlattenKey(this.rawJson.value, key, value)
+        this.rawJson.setSrcValue(obj)
     }
 
     setTranslatedJson(obj: object) {
-        this.translatedJson.value = obj
+        this.translatedJson.setSrcValue(obj)
     }
 
     async translate() {
-        if (this.rawJsonEmpty.value) {
+        if (this.rawJson.isEmpty()) {
             this.snackbarMessages.value.push("Nothing to translate")
             return
         }
         this.loading.value = true
         let text = ""
-        const stream = await fetchCompletionResponse(this.apiConfig.value, this.rawJson.value, this.prompt.value)
+        const stream = await fetchCompletionResponse(
+            this.apiConfig.value,
+            this.rawJson.getSrcValue(),
+            this.prompt.value
+        )
         for await (const event of stream) {
             text += event.choices[0].delta.content
         }
@@ -97,17 +91,17 @@ export class ViewModel {
 
     clearJson() {
         if (confirm('Clear Character Spec Json?')) {
-            this.rawJson.value = null
-            this.translatedJson.value = null
+            this.rawJson.setSrcValue({})
+            this.translatedJson.setSrcValue({})
         }
     }
 
     downloadJson() {
-        downloadJsonFile(this.translatedJson.value, "translated.json")
+        downloadJsonFile(this.translatedJson.getSrcValue(), "translated.json")
     }
 
     downloadImage() {
-        downloadImageFile(this.translatedJson.value, this.image.value, "translated.png")
+        downloadImageFile(this.translatedJson.getSrcValue(), this.image.value, "translated.png")
     }
 
     openBugReport() {
