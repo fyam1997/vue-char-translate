@@ -3,7 +3,7 @@ import {isValidFile, LoadFileType, readFileContent} from "@/viewmodel/ReadFileCo
 import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts";
 import {APIConfigModel, fetchCompletionResponse} from "@/viewmodel/Translation.ts";
 import {computed, ref} from "vue";
-import {getFlattenArray, parseJsonOrNull, setValueByFlattenKey} from "@/viewmodel/JsonUtils.ts";
+import {getFlattenArray, isEmpty, parseJsonOrNull, setValueByFlattenKey} from "@/viewmodel/JsonUtils.ts";
 
 export class ViewModel {
     image = useLocalStorage("raw-image", "")
@@ -23,6 +23,9 @@ export class ViewModel {
     rawJson = useLocalStorage<object>("raw-json", {})
     flattenRawJson = computed(() => {
         return getFlattenArray(this.rawJson.value)
+    })
+    rawJsonEmpty = computed(() => {
+        return isEmpty(this.rawJson.value)
     })
     translatedJson = useLocalStorage<object>("translated-json", {})
 
@@ -44,15 +47,12 @@ export class ViewModel {
         }
         const {json, png} = await readFileContent(file)
 
-        switch (loadFileType) {
-            case LoadFileType.JSON:
-                this.setRawJson(json)
-                break
-            case LoadFileType.PNG:
-            default:
-                this.image.value = png
-                this.setRawJson(json)
-                break
+        // ask for confirmation if target field is not empty
+        if (png && (!this.image.value || confirm("Replace Image?"))) {
+            this.image.value = png
+        }
+        if (json && (this.rawJsonEmpty.value || confirm("Replace Character Spec Json?"))) {
+            this.setRawJson(json)
         }
     }
 
@@ -69,7 +69,7 @@ export class ViewModel {
     }
 
     async translate() {
-        if (Object.keys(this.rawJson.value).length === 0) {
+        if (this.rawJsonEmpty.value) {
             this.snackbarMessages.value.push("Nothing to translate")
             return
         }
@@ -84,12 +84,16 @@ export class ViewModel {
     }
 
     clearImage() {
-        this.image.value = ""
+        if (confirm('Clear Image?')) {
+            this.image.value = ""
+        }
     }
 
     clearJson() {
-        this.rawJson.value = null
-        this.translatedJson.value = null
+        if (confirm('Clear Character Spec Json?')) {
+            this.rawJson.value = null
+            this.translatedJson.value = null
+        }
     }
 
     downloadJson() {

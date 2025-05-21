@@ -35,3 +35,7 @@ export function parseJsonOrNull(text: string): object {
         return null
     }
 }
+
+export function isEmpty(json: object): boolean {
+    return !Object.keys(json).length
+}
