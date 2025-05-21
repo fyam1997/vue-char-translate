@@ -9,7 +9,7 @@ const appVersion = __APP_VERSION__
 </script>
 
 <template>
-  <div class="d-flex flex-column ga-4 overflow-y-auto">
+  <div class="h-100 d-flex flex-column ga-4 overflow-y-auto pa-4">
     <div>
       <v-alert border="start">
         Configuration is only saved in the browser.
@@ -42,11 +42,10 @@ const appVersion = __APP_VERSION__
         variant="outlined"
         label="Translation Prompt"
         v-model="viewModel.prompt.value"
-        class="flex-grow-0"
+        class="flex-grow-1"
         hide-details
     />
 
-    <v-spacer/>
     <v-divider/>
 
     <v-list-item
