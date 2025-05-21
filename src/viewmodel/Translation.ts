@@ -1,10 +1,4 @@
 import OpenAI from "openai";
-import {
-    ChatCompletionChunk,
-    ChatCompletionCreateParamsStreaming
-} from "openai/src/resources/chat/completions/completions";
-import {APIPromise} from "openai/src/core";
-import {Stream} from "openai/src/streaming";
 
 export interface APIConfigModel {
     baseURL: string
@@ -16,13 +10,14 @@ export async function fetchCompletionResponse(
     apiConfig: APIConfigModel,
     json: string,
     prompt: string,
-): APIPromise<Stream<ChatCompletionChunk>> {
+) {
     const client = new OpenAI({
         baseURL: apiConfig.baseURL,
         apiKey: apiConfig.apiKey,
         dangerouslyAllowBrowser: true,
     })
-    const requestMessages = [
+    // declare as any[] to suppress ChatCompletionMessageParam's warning
+    const requestMessages: any[] = [
         {
             role: "system",
             content: prompt,
@@ -32,10 +27,9 @@ export async function fetchCompletionResponse(
             content: json,
         },
     ]
-    const requestBody: ChatCompletionCreateParamsStreaming = {
+    return client.chat.completions.create({
         model: apiConfig.model,
         messages: requestMessages,
         stream: true
-    }
-    return client.chat.completions.create(requestBody)
+    })
 }
