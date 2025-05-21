@@ -1,5 +1,6 @@
 import {getMetadata} from "meta-png";
 import {Base64} from "js-base64";
+import {parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
 
 export function isValidFile(file: File, loadFileType: LoadFileType): boolean {
     const allowedTypes = getAllowedTypes(loadFileType)
@@ -28,7 +29,7 @@ export async function readFileContent(file: File): Promise<FileContent> {
         return await readPngContent(file);
     } else {
         return {
-            json: await file.text(),
+            json: parseJsonOrNull(await file.text()),
             png: null,
         };
     }
@@ -46,7 +47,7 @@ async function readPngContent(file: File): Promise<FileContent> {
         decodedJson = null
     }
     return {
-        json: decodedJson,
+        json: parseJsonOrNull(decodedJson),
         png: Base64.fromUint8Array(uint8Array),
     }
 }
@@ -59,5 +60,5 @@ export enum LoadFileType {
 
 interface FileContent {
     png: string | null
-    json: string | null
+    json: object | null
 }

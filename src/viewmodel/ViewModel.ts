@@ -42,17 +42,25 @@ export class ViewModel {
 
         switch (loadFileType) {
             case LoadFileType.JSON:
-                this.rawJson.value = json
+                this.setRawJson(json)
                 break
             case LoadFileType.PNG:
                 this.image.value = png
                 break
             case LoadFileType.BOTH:
             default:
-                this.rawJson.value = json
+                this.setRawJson(json)
                 this.image.value = png
                 break
         }
+    }
+
+    setRawJson(obj: object) {
+        this.rawJson.value = JSON.stringify(obj, null, 2)
+    }
+
+    setTranslatedJson(obj: object) {
+        this.translatedJson.value = JSON.stringify(obj, null, 2)
     }
 
     async translate() {

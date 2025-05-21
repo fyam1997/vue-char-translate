@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {inject} from "vue";
 import {ViewModel} from "@/viewmodel/ViewModel.ts";
+import EditObjectDialog from "@/components/EditObjectDialog.vue";
 
 const viewModel = inject<ViewModel>("viewModel")
 const translatedJson = viewModel.translatedJson
@@ -11,7 +12,7 @@ const translatedJson = viewModel.translatedJson
   <div class="h-100 d-flex flex-column ga-2">
     <div class="overflow-y-auto flex-grow-1">
       <h4>Translated</h4>
-      <v-textarea v-model="translatedJson" no-resize hide-details auto-grow/>
+      <EditObjectDialog :text="translatedJson" @save="obj=>viewModel.setTranslatedJson(obj)"/>
     </div>
     <v-divider/>
     <div class="d-flex flex-row ga-2 ma-4">
