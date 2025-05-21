@@ -9,7 +9,7 @@ const appVersion = __APP_VERSION__
 </script>
 
 <template>
-  <div class="d-flex flex-column ga-4 overflow-y-auto">
+  <div class="h-100 d-flex flex-column ga-4 overflow-y-auto pa-4">
     <div>
       <v-alert border="start">
         Configuration is only saved in the browser.

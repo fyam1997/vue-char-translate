@@ -10,8 +10,8 @@ const viewModel = inject<ViewModel>("viewModel")
 </script>
 
 <template>
-  <div class="d-flex flex-column ga-2">
-    <div class="overflow-y-auto flex-grow-1">
+  <div class="h-100 d-flex flex-column">
+    <div class="overflow-y-auto flex-grow-1 pa-4">
       <ImagePanel/>
       <v-divider class="mt-8 mb-8"/>
       <RawJsonPanel/>
