@@ -100,8 +100,8 @@ export class ViewModel {
 
     clearJson() {
         if (confirm('Clear Character Spec Json?')) {
-            this.rawJson.setSrcValue({})
-            this.translatedJson.setSrcValue({})
+            this.setRawJson({})
+            this.setTranslatedJson({})
         }
     }
 
