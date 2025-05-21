@@ -4,9 +4,9 @@ import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts
 import {APIConfigModel, fetchCompletionResponse} from "@/viewmodel/Translation.ts";
 import {computed, ref} from "vue";
 import {getFlattenArray, isEmpty, parseJsonOrNull, setValueByFlattenKey} from "@/viewmodel/JsonUtils.ts";
+import {loadImage, saveImage} from "@/viewmodel/ImageCache.ts";
 
 export class ViewModel {
-    // TODO local storage is too small for image, try indexed db
     image = ref<Uint8Array>(null)
     imageSrc = computed(() => {
         if (!this.image.value) return null
@@ -40,6 +40,10 @@ export class ViewModel {
         return this.darkTheme.value ? 'md:light_mode' : 'md:dark_mode'
     })
 
+    async loadCachedImage() {
+        this.image.value = await loadImage()
+    }
+
     async loadFile(files: File[] | File, loadFileType: LoadFileType) {
         const file = Array.isArray(files) ? files[0] : files
         if (!isValidFile(file, loadFileType)) {
@@ -51,6 +55,7 @@ export class ViewModel {
         // ask for confirmation if target field is not empty
         if (png && (!this.image.value || confirm("Replace Image?"))) {
             this.image.value = png
+            await saveImage(png)
         }
         if (json && (this.rawJsonEmpty.value || confirm("Replace Character Spec Json?"))) {
             this.setRawJson(json)

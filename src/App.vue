@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import {ViewModel} from "@/viewmodel/ViewModel.ts";
-import {provide} from "vue";
+import {onMounted, provide} from "vue";
 import ConfigPanel from "@/components/ConfigPanel.vue";
 import RawPanel from "@/components/RawPanel.vue";
 import ResultPanel from "@/components/ResultPanel.vue";
 
 const viewModel = new ViewModel()
 provide("viewModel", viewModel)
+
+onMounted(()=>{
+  viewModel.loadCachedImage()
+})
 
 </script>
 
