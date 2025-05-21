@@ -42,11 +42,10 @@ const appVersion = __APP_VERSION__
         variant="outlined"
         label="Translation Prompt"
         v-model="viewModel.prompt.value"
-        class="flex-grow-0"
+        class="flex-grow-1"
         hide-details
     />
 
-    <v-spacer/>
     <v-divider/>
 
     <v-list-item
