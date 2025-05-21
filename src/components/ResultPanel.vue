@@ -17,6 +17,7 @@ const translatedJson = viewModel.translatedJson
         <v-spacer/>
         <EditObjectDialog :obj="translatedJson.getSrcValue()" @save="obj=>viewModel.setTranslatedJson(obj)"/>
       </div>
+      <div class="text-caption text-disabled">{{ viewModel.loadingText.value }}</div>
       <FlattenJsonList :flatten-json="viewModel.translatedJson"/>
     </div>
     <v-divider/>

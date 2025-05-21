@@ -32,6 +32,7 @@ export class ViewModel {
 
     rawJson = new FlattenJson(useLocalStorage<object>("raw-json", {}))
     translatedJson = new FlattenJson(useLocalStorage<object>("translated-json", {}))
+    loadingText = ref("")
 
     snackbarMessages = ref<string[]>([])
     loading = ref(false)
@@ -79,16 +80,18 @@ export class ViewModel {
             return
         }
         this.loading.value = true
-        let text = ""
+        this.setTranslatedJson({})
+        this.loadingText.value = ""
         const stream = await fetchCompletionResponse(
             this.apiConfig.value,
             this.rawJson.getSrcValue(),
             this.prompt.value
         )
         for await (const event of stream) {
-            text += event.choices[0].delta.content
+            this.loadingText.value += event.choices[0].delta.content
         }
-        this.setTranslatedJson(parseJsonOrNull(text))
+        this.setTranslatedJson(parseJsonOrNull(this.loadingText.value))
+        this.loadingText.value = ""
         this.loading.value = false
     }
 
