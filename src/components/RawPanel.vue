@@ -23,6 +23,7 @@ const viewModel = inject<ViewModel>("viewModel")
         variant="outlined"
         @click="viewModel.translate()"
         text="Translate"
+        :loading="viewModel.loading.value"
     />
   </div>
 </template>
