@@ -10,7 +10,7 @@ const translatedJson = viewModel.translatedJson
 </script>
 
 <template>
-  <div class="h-100 d-flex flex-column ga-2">
+  <div class="d-flex flex-column ga-2">
     <div class="overflow-y-auto flex-grow-1">
       <div class="pb-4 d-flex flex-row align-center">
         <h4>Translated</h4>
@@ -21,9 +21,9 @@ const translatedJson = viewModel.translatedJson
     </div>
     <v-divider/>
     <div class="d-flex flex-row ga-2 ma-4">
-      <v-btn @click="viewModel.downloadJson()" prepend-icon="md:download" text="Download Json"
+      <v-btn @click="viewModel.downloadJson()" prepend-icon="md:download" text="Json"
              class="text-none flex-grow-1" variant="outlined"/>
-      <v-btn @click="viewModel.downloadImage()" prepend-icon="md:download" text="Download Image"
+      <v-btn @click="viewModel.downloadImage()" prepend-icon="md:download" text="Image"
              class="text-none flex-grow-1" variant="outlined"/>
     </div>
   </div>

@@ -45,6 +45,7 @@ watch(editText, () => {
       max-width="600"
       scroll-strategy="none"
       v-model="showDialog"
+      scrollable
   >
     <template v-slot:activator>
       <v-btn
@@ -59,7 +60,6 @@ watch(editText, () => {
         <v-textarea
             v-model="editText"
             auto-grow
-            max-rows="20"
             :error-messages="errorMsg"
         />
       </v-card-text>

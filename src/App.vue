@@ -8,7 +8,7 @@ import ResultPanel from "@/components/ResultPanel.vue";
 const viewModel = new ViewModel()
 provide("viewModel", viewModel)
 
-onMounted(()=>{
+onMounted(() => {
   viewModel.loadCachedImage()
 })
 
@@ -17,13 +17,9 @@ onMounted(()=>{
 <template>
   <v-app :theme="viewModel.theme.value">
     <v-snackbar-queue v-model="viewModel.snackbarMessages.value" location="top"></v-snackbar-queue>
-    <div class="w-100 h-100 d-flex flex-row ga-2 justify-center">
-      <ConfigPanel class="config-panel-large w-100 h-100 pa-4"/>
-      <div class="content-panel-large flex-grow-1 pa-4 d-flex flex-column">
-        <RawPanel class="raw-panel-large w-100 flex-grow-1 pa-4"/>
-        <v-divider/>
-        <v-btn class="ma-4 text-none" prepend-icon="md:translate" variant="outlined" @click="viewModel.translate()" text="Translate"/>
-      </div>
+    <div class="w-100 h-100 d-flex flex-row ga-2 justify-center overflow-x-auto">
+      <ConfigPanel class="config-panel-large flex-grow-0 h-100 pa-4"/>
+      <RawPanel class="content-panel-large flex-grow-1 pa-4"/>
       <ResultPanel class="content-panel-large flex-grow-1 pa-4"/>
     </div>
   </v-app>
@@ -31,10 +27,13 @@ onMounted(()=>{
 
 <style scoped>
 .config-panel-large {
+  min-width: 300px;
   max-width: 300px;
 }
 
 .content-panel-large {
+  min-width: 300px;
   max-width: 600px;
+  width: 50%;
 }
 </style>
