@@ -1,26 +1,28 @@
 import {useLocalStorage} from "@vueuse/core";
 import {isValidFile, LoadFileType, readFileContent} from "@/viewmodel/ReadFileContent.ts";
-import {SingleShotEvent} from "@/viewmodel/SingleShotEvent.ts";
 import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts";
 import {APIConfigModel, fetchCompletionResponse} from "@/viewmodel/Translation.ts";
 import {computed, ref} from "vue";
+import {FlattenJson, parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
+import {loadImage, saveImage} from "@/viewmodel/ImageCache.ts";
 
 export class ViewModel {
-    image = useLocalStorage("raw-image", "")
+    image = ref<Uint8Array>(null)
     imageSrc = computed(() => {
-        const encodedImage = this.image.value
-        if (!encodedImage) return ''
-        return `data:image/png;base64,${encodedImage}`
+        if (!this.image.value) return null
+        const blob = new Blob([this.image.value], {type: "image/png"})
+        return URL.createObjectURL(blob)
     })
 
-    rawJson = useLocalStorage("raw-json", "")
     prompt = useLocalStorage("translation-prompt", "")
-    translatedJson = useLocalStorage("translated-json", "")
     apiConfig = useLocalStorage<APIConfigModel>("api-config", {
         baseURL: "",
         apiKey: "",
         model: "",
     })
+
+    rawJson = new FlattenJson(useLocalStorage<object>("raw-json", {}))
+    translatedJson = new FlattenJson(useLocalStorage<object>("translated-json", {}))
 
     snackbarMessages = ref<string[]>([])
     loading = ref(false)
@@ -32,6 +34,10 @@ export class ViewModel {
         return this.darkTheme.value ? 'md:light_mode' : 'md:dark_mode'
     })
 
+    async loadCachedImage() {
+        this.image.value = await loadImage()
+    }
+
     async loadFile(files: File[] | File, loadFileType: LoadFileType) {
         const file = Array.isArray(files) ? files[0] : files
         if (!isValidFile(file, loadFileType)) {
@@ -40,50 +46,62 @@ export class ViewModel {
         }
         const {json, png} = await readFileContent(file)
 
-        switch (loadFileType) {
-            case LoadFileType.JSON:
-                this.rawJson.value = json
-                break
-            case LoadFileType.PNG:
-                this.image.value = png
-                break
-            case LoadFileType.BOTH:
-            default:
-                this.rawJson.value = json
-                this.image.value = png
-                break
+        // ask for confirmation if target field is not empty
+        if (png && (!this.image.value || confirm("Replace Image?"))) {
+            this.image.value = png
+            await saveImage(png)
+        }
+        if (json && (this.rawJson.isEmpty() || confirm("Replace Character Spec Json?"))) {
+            this.setRawJson(json)
         }
     }
 
+    setRawJson(obj: object) {
+        this.rawJson.setSrcValue(obj)
+    }
+
+    setTranslatedJson(obj: object) {
+        this.translatedJson.setSrcValue(obj)
+    }
+
     async translate() {
-        if (this.rawJson.value === "") {
+        if (this.rawJson.isEmpty()) {
             this.snackbarMessages.value.push("Nothing to translate")
             return
         }
         this.loading.value = true
-        this.translatedJson.value = ""
-        const stream = await fetchCompletionResponse(this.apiConfig.value, this.rawJson.value, this.prompt.value)
+        let text = ""
+        const stream = await fetchCompletionResponse(
+            this.apiConfig.value,
+            this.rawJson.getSrcValue(),
+            this.prompt.value
+        )
         for await (const event of stream) {
-            this.translatedJson.value += event.choices[0].delta.content
+            text += event.choices[0].delta.content
         }
+        this.setTranslatedJson(parseJsonOrNull(text))
         this.loading.value = false
     }
 
     clearImage() {
-        this.image.value = ""
+        if (confirm('Clear Image?')) {
+            this.image.value = null
+        }
     }
 
     clearJson() {
-        this.rawJson.value = ""
-        this.translatedJson.value = ""
+        if (confirm('Clear Character Spec Json?')) {
+            this.rawJson.setSrcValue({})
+            this.translatedJson.setSrcValue({})
+        }
     }
 
     downloadJson() {
-        downloadJsonFile(this.translatedJson.value, "translated.json")
+        downloadJsonFile(this.translatedJson.getSrcValue(), "translated.json")
     }
 
     downloadImage() {
-        downloadImageFile(this.translatedJson.value, this.image.value, "translated.png")
+        downloadImageFile(this.translatedJson.getSrcValue(), this.image.value, "translated.png")
     }
 
     openBugReport() {

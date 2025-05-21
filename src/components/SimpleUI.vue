@@ -25,11 +25,6 @@ const translatedJson = viewModel.translatedJson
     <v-text-field v-model="apiConfig.model" label="model"/>
     <v-textarea v-model="prompt" label="prompt" auto-grow/>
     <v-file-input
-        label="Both"
-        @update:modelValue="file => viewModel.loadFile(file, LoadFileType.BOTH)"
-        accept=".json,.png"
-    />
-    <v-file-input
         label="Image"
         @update:modelValue="file => viewModel.loadFile(file, LoadFileType.PNG)"
         accept=".png"

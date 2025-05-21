@@ -8,7 +8,7 @@ export interface APIConfigModel {
 
 export async function fetchCompletionResponse(
     apiConfig: APIConfigModel,
-    json: string,
+    json: object,
     prompt: string,
 ) {
     const client = new OpenAI({
@@ -24,7 +24,7 @@ export async function fetchCompletionResponse(
         },
         {
             role: "user",
-            content: json,
+            content: JSON.stringify(json),
         },
     ]
     return client.chat.completions.create({
