@@ -50,7 +50,7 @@ const rawJson = viewModel.rawJson
           <v-icon-btn icon="md:delete" variant="plain" @click="viewModel.clearJson()" title="Delete"/>
           <v-icon-btn icon="md:upload" variant="plain" @click="openFile" title="Upload"/>
         </div>
-        <v-textarea v-model="rawJson" no-resize hide-details/>
+        <v-textarea v-model="rawJson" no-resize auto-grow hide-details/>
       </template>
     </FileZone>
   </div>

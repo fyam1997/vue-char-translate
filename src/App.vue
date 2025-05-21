@@ -18,7 +18,7 @@ provide("viewModel", viewModel)
       <div class="content-panel-large flex-grow-1 pa-4 d-flex flex-column">
         <RawPanel class="raw-panel-large w-100 flex-grow-1 pa-4"/>
         <v-divider/>
-        <v-btn class="ma-4" variant="outlined" @click="viewModel.translate()" text="Translate"/>
+        <v-btn class="ma-4 text-none" prepend-icon="md:translate" variant="outlined" @click="viewModel.translate()" text="Translate"/>
       </div>
       <ResultPanel class="content-panel-large flex-grow-1 pa-4"/>
     </div>
