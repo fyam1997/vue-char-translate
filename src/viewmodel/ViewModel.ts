@@ -95,9 +95,10 @@ export class ViewModel {
         this.loading.value = false
     }
 
-    clearImage() {
+    async clearImage() {
         if (confirm('Clear Image?')) {
             this.image.value = null
+            await saveImage(null)
         }
     }
 
