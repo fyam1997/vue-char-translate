@@ -11,6 +11,7 @@
   "dependencies": {
     "@vueuse/core": "^13.1.0",
     "gh-pages": "^6.3.0",
+    "idb": "^8.0.3",
     "js-base64": "^3.7.7",
     "meta-png": "^1.0.6",
     "openai": "^4.95.1",
