@@ -18,14 +18,14 @@ export class ViewModel {
 
     prompt = useLocalStorage("translation-prompt", "You are an expert translator who translates English to Traditional Chinese. You pay attention to style, formality, idioms, slang etc and try to convey it in the way a Traditional Chinese speaker would understand.\n" +
         "BE MORE NATURAL.\n" +
-        "Specifically, you will be translating text from a role play charactor card.\n" +
-        "To aid you and provide context, You will be given a json of the charactor card. Return the json with the texts translated. \n" +
+        "Specifically, you will be translating text from a role play character card.\n" +
+        "To aid you and provide context, You will be given a json of the character card. Return the json with the texts translated. \n" +
         "DO NOT translate the json keys.\n" +
         "DO NOT respond in markdown format like ```json ```.\n" +
         "DO NOT give explanations.\n" +
         "If it's already in Traditional Chineseor looks like gibberish, OUTPUT IT AS IT IS instead.\n" +
-        "Translate all charactor name.\n" +
-        "repalce all \"\" with 「」 in side json values.")
+        "Translate all character name.\n" +
+        "replace all \"\" with 「」 in side json values.")
     apiConfig = useLocalStorage<APIConfigModel>("api-config", {
         baseURL: "",
         apiKey: "",
@@ -83,26 +83,17 @@ export class ViewModel {
         }
         this.loading.value = true
         this.setTranslatedJson({})
-        const target = this.translatedJson.getSrcValue()
+        this.loadingText.value = ""
         const stream = await fetchCompletionResponse(
             this.apiConfig.value,
             this.rawJson.getSrcValue(),
             this.prompt.value
         )
-        let fullText = ""
-        const textStream = transformAndFlatten(stream, (event) => {
-            const chunk = event.choices[0].delta.content
-            fullText += chunk
-            triggerRef(this.translatedJson.src)
-            return chunk
-        })
-        try {
-            const parser = new LiveJSONParser(textStream)
-            await parser.readObject(target)
-        } catch (e) {
-            console.error(e)
+        for await (const event of stream) {
+            this.loadingText.value += event.choices[0].delta.content
         }
-        this.setTranslatedJson(parseJsonOrNull(fullText))
+        this.setTranslatedJson(parseJsonOrNull(this.loadingText.value))
+        this.loadingText.value = ""
         this.loading.value = false
     }
 
