@@ -1,6 +1,6 @@
 {
   "name": "vue_studies",
-  "version": "0.1.5",
+  "version": "0.1.6-dev",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,6 +14,7 @@
     "js-base64": "^3.7.7",
     "meta-png": "^1.0.6",
     "openai": "^4.95.1",
+    "vitest": "^3.1.4",
     "vue": "^3.5.13",
     "vuetify": "^3.8.2"
   },
