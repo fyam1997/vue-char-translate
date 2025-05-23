@@ -2,9 +2,11 @@ import {useLocalStorage} from "@vueuse/core";
 import {isValidFile, LoadFileType, readFileContent} from "@/viewmodel/ReadFileContent.ts";
 import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts";
 import {APIConfigModel, fetchCompletionResponse} from "@/viewmodel/Translation.ts";
-import {computed, ref} from "vue";
+import {computed, ref, triggerRef} from "vue";
 import {FlattenJson, parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
 import {loadImage, saveImage} from "@/viewmodel/ImageCache.ts";
+import {transformAndFlatten} from "@/viewmodel/AsyncUtils.ts";
+import {LiveJSONParser} from "@/viewmodel/LiveJsonParser.ts";
 
 export class ViewModel {
     image = ref<Uint8Array>(null)
@@ -81,17 +83,26 @@ export class ViewModel {
         }
         this.loading.value = true
         this.setTranslatedJson({})
-        this.loadingText.value = ""
+        const target = this.translatedJson.getSrcValue()
         const stream = await fetchCompletionResponse(
             this.apiConfig.value,
             this.rawJson.getSrcValue(),
             this.prompt.value
         )
-        for await (const event of stream) {
-            this.loadingText.value += event.choices[0].delta.content
+        let fullText = ""
+        const textStream = transformAndFlatten(stream, (event) => {
+            const chunk = event.choices[0].delta.content
+            fullText += chunk
+            triggerRef(this.translatedJson.src)
+            return chunk
+        })
+        try {
+            const parser = new LiveJSONParser(textStream)
+            await parser.readObject(target)
+        } catch (e) {
+            console.error(e)
         }
-        this.setTranslatedJson(parseJsonOrNull(this.loadingText.value))
-        this.loadingText.value = ""
+        this.setTranslatedJson(parseJsonOrNull(fullText))
         this.loading.value = false
     }
 
