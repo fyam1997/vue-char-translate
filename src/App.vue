@@ -10,6 +10,7 @@ const viewModel = new ViewModel()
 provide("viewModel", viewModel)
 
 onMounted(() => {
+  viewModel.loadDefaultPrompt()
   viewModel.loadCachedImage()
 })
 
