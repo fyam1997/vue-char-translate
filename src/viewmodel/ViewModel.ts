@@ -1,5 +1,5 @@
 import {useLocalStorage} from "@vueuse/core";
-import {isValidFile, LoadFileType, readFileContent} from "@/viewmodel/ReadFileContent.ts";
+import {isValidFile, readFileContent} from "@/viewmodel/ReadFileContent.ts";
 import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts";
 import {fetchCompletionResponse} from "@/viewmodel/Translation.ts";
 import {computed, Ref, ref} from "vue";
@@ -51,9 +51,10 @@ export class ViewModel {
         }
     }
 
-    async loadFile(files: File[] | File, loadFileType: LoadFileType) {
+    async loadFile(files: File[] | File) {
+        if (!files) return
         const file = Array.isArray(files) ? files[0] : files
-        if (!isValidFile(file, loadFileType)) {
+        if (!isValidFile(file)) {
             this.snackbarMessages.value.push("Illegal File")
             return
         }
