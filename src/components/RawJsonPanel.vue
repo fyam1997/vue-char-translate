@@ -16,7 +16,7 @@ const openFile = inject<(localOptions?: Partial<UseFileDialogOptions>) => void>(
 <template>
   <div>
     <div class="pb-4 d-flex flex-row align-center">
-      <h4>Json</h4>
+      <h4>Character Spec</h4>
       <v-spacer/>
       <EditObjectDialog :obj="rawJson.getSrcValue()" @save="obj=>viewModel.setRawJson(obj)"/>
       <v-icon-btn v-if="!rawJson.isEmpty()" icon="md:delete" variant="plain" @click="viewModel.clearJson()"
