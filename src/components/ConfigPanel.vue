@@ -1,48 +1,22 @@
 <script setup lang="ts">
 import {ViewModel} from "@/viewmodel/ViewModel.ts";
 import {inject} from "vue";
+import ApiConfigDialog from "@/shared/apiconfig/APIConfigDialog.vue";
 
 const viewModel = inject<ViewModel>("viewModel")
-const apiConfig = viewModel.apiConfig
 const appVersion = __APP_VERSION__
 
 </script>
 
 <template>
   <div class="h-100 d-flex flex-column ga-4 overflow-y-auto pa-4">
-    <div>
-      <v-alert border="start">
-        Configuration is only saved in the browser.
-        Please clear API key before leave if you are using public devices.
-      </v-alert>
-    </div>
-    <v-text-field
-        variant="outlined"
-        label="BaseURL"
-        v-model="apiConfig.baseURL"
-        class="flex-grow-0"
-        hide-details
-    />
-    <v-text-field
-        variant="outlined"
-        label="ApiKey"
-        type="password"
-        v-model="apiConfig.apiKey"
-        class="flex-grow-0"
-        hide-details
-    />
-    <v-text-field
-        variant="outlined"
-        label="Model"
-        v-model="apiConfig.model"
-        class="flex-grow-0"
-        hide-details
-    />
+    <ApiConfigDialog/>
     <v-textarea
         variant="outlined"
         label="Translation Prompt"
         v-model="viewModel.prompt.value"
         class="flex-grow-1"
+        auto-grow
         hide-details
     />
 
