@@ -26,7 +26,7 @@ function save() {
 }
 
 function openDialog() {
-  if (props.obj) {
+  if (Object.keys(props.obj).length > 0) {
     editText.value = JSON.stringify(props.obj, null, 2)
   } else {
     editText.value = ""
