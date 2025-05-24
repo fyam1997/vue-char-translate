@@ -28,7 +28,11 @@ export function useIndexedDB<T>(
     async function load() {
         const db = await dbProvider()
         const value = await db.get(options.store, getKey())
-        if (value !== undefined) data.value = value
+        if (value !== undefined) {
+            data.value = value
+        } else {
+            await save(defaultValue)
+        }
     }
 
     async function save(value: T) {
