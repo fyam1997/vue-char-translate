@@ -11,7 +11,6 @@ provide("viewModel", viewModel)
 
 onMounted(() => {
   viewModel.loadDefaultPrompt()
-  viewModel.loadCachedImage()
 })
 
 const screenWidth = useWindowSize().width
@@ -19,7 +18,7 @@ const largeScreen = computed(() => screenWidth.value >= 950)
 const tab = ref("raw-panel")
 
 const shouldShowTranslated = computed(() => {
-  return viewModel.loading.value || !viewModel.translatedJson.isEmpty()
+  return true
 })
 
 watch(viewModel.loading, (after, before) => {

@@ -4,12 +4,12 @@ import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts
 import {APIConfigModel, fetchCompletionResponse} from "@/viewmodel/Translation.ts";
 import {computed, ref, triggerRef} from "vue";
 import {FlattenJson, parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
-import {loadImage, saveImage} from "@/viewmodel/ImageCache.ts";
-import {transformAndFlatten} from "@/viewmodel/AsyncUtils.ts";
-import {LiveJSONParser} from "@/viewmodel/LiveJsonParser.ts";
+import {TranslationStorage} from "@/viewmodel/TranslationStorage.ts";
 
 export class ViewModel {
-    image = ref<Uint8Array>(null)
+    storage = new TranslationStorage()
+
+    image = this.storage.image
     imageSrc = computed(() => {
         if (!this.image.value) return null
         const blob = new Blob([this.image.value], {type: "image/png"})
@@ -23,8 +23,8 @@ export class ViewModel {
         model: "",
     })
 
-    rawJson = new FlattenJson(useLocalStorage<object>("raw-json", {}))
-    translatedJson = new FlattenJson(useLocalStorage<object>("translated-json", {}))
+    rawJson = new FlattenJson(this.storage.raw)
+    translatedJson = new FlattenJson(this.storage.translated)
     loadingText = ref("")
 
     snackbarMessages = ref<string[]>([])
@@ -43,10 +43,6 @@ export class ViewModel {
         }
     }
 
-    async loadCachedImage() {
-        this.image.value = await loadImage()
-    }
-
     async loadFile(files: File[] | File, loadFileType: LoadFileType) {
         const file = Array.isArray(files) ? files[0] : files
         if (!isValidFile(file, loadFileType)) {
@@ -58,7 +54,6 @@ export class ViewModel {
         // ask for confirmation if target field is not empty
         if (png && (!this.image.value || confirm("Replace Image?"))) {
             this.image.value = png
-            await saveImage(png)
         }
         if (json && (this.rawJson.isEmpty() || confirm("Replace Character Spec Json?"))) {
             this.setRawJson(json)
@@ -97,7 +92,6 @@ export class ViewModel {
     async clearImage() {
         if (confirm('Clear Image?')) {
             this.image.value = null
-            await saveImage(null)
         }
     }
 
