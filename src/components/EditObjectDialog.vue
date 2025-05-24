@@ -4,6 +4,7 @@ import {parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
 
 const props = defineProps<{
   obj: object
+  buttonText?: string
 }>()
 
 const emits = defineEmits<{
@@ -49,8 +50,17 @@ watch(editText, () => {
   >
     <template v-slot:activator>
       <v-btn
+          v-if="!buttonText"
           icon="md:edit_note"
           variant="plain"
+          @click="openDialog"
+      />
+      <v-btn
+          v-else
+          prepend-icon="md:edit_note"
+          variant="text"
+          class="text-none"
+          :text="buttonText"
           @click="openDialog"
       />
     </template>
