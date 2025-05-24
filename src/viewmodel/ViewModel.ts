@@ -82,6 +82,12 @@ export class ViewModel {
             this.snackbarMessages.value.push("Nothing to translate")
             return
         }
+        const apiConfig = this.apiConfig.value
+        if (!apiConfig.baseURL || !apiConfig.model) {
+            this.snackbarMessages.value.push("API configuration is empty")
+            return
+        }
+
         this.loading.value = true
         this.setTranslatedJson({})
         this.loadingText.value = ""
