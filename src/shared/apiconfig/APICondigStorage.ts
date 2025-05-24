@@ -1,5 +1,5 @@
 import {ref} from "vue";
-import {sharedData, SharedStore} from "@/shared/db/SharedStorage.ts";
+import {removeSharedData, sharedData, SharedStore} from "@/shared/db/SharedStorage.ts";
 
 export interface APIConfigModel {
     baseURL: string
@@ -7,11 +7,29 @@ export interface APIConfigModel {
     model: string
 }
 
+export interface APIConfigIndex {
+    id: number
+    name: string
+}
+
 export class APIConfigStorage {
-    id = ref(0)
+    id = sharedData<number>(
+        ref("selectedID"),
+        0,
+        SharedStore.APIConfig,
+    )
+    idList = sharedData<APIConfigIndex[]>(
+        ref("index"),
+        [{id: 0, name: "Default"}],
+        SharedStore.APIConfig,
+    )
     config = sharedData<APIConfigModel>(
         this.id,
         {baseURL: "", apiKey: "", model: ""},
-        SharedStore.APIConfig, 200
+        SharedStore.APIConfig,
     )
+
+    removeConfig(id: number) {
+        removeSharedData(id, SharedStore.APIConfig).catch(console.error)
+    }
 }

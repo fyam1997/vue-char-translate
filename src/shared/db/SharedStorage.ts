@@ -27,3 +27,8 @@ export function sharedData<T>(id: Ref<string | number>, defaultValue: T, store: 
         },
     )
 }
+
+export async function removeSharedData(id: string | number, store: string) {
+    const db = await sharedDB();
+    await db.delete(store, id)
+}
