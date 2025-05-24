@@ -17,7 +17,7 @@ export class ViewModel {
         return URL.createObjectURL(blob)
     })
 
-    prompt = useLocalStorage("translation-prompt", "")
+    prompt: Ref<string>
     rawJson: FlattenJson
     translatedJson: FlattenJson
     loadingText = ref("")
@@ -38,11 +38,14 @@ export class ViewModel {
     ) {
         this.apiConfig = this.apiConfigStorage.config
         this.image = this.storage.image
+        this.prompt = this.storage.prompt
         this.rawJson = new FlattenJson(this.storage.raw)
         this.translatedJson = new FlattenJson(this.storage.translated)
     }
 
     async loadDefaultPrompt() {
+        // TODO since onMounted will try to read value from DB, if no value, it will save default value, the saving is happen after this
+        await new Promise((resolve) => setTimeout(resolve, 200))
         if (!this.prompt.value) {
             this.prompt.value = await (await fetch('/default_prompt.txt')).text()
         }
