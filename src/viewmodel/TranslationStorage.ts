@@ -1,6 +1,6 @@
 import {openDB} from "idb";
-import {DBKey, useIndexedDB} from "@/shared/db/DatabaseUtils.ts";
-import {ref} from "vue";
+import {useIndexedDB} from "@/shared/db/DatabaseUtils.ts";
+import {Ref, ref} from "vue";
 
 export class TranslationStorage {
     id = ref(0)
@@ -27,7 +27,7 @@ function translationDB() {
     })
 }
 
-function translationData<T>(id: DBKey, defaultValue: T, store: Store, debounce: number = null) {
+function translationData<T>(id: Ref<string | number>, defaultValue: T, store: Store, debounce: number = null) {
     return useIndexedDB(
         id,
         defaultValue,

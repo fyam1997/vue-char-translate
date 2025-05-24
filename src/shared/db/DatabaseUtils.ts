@@ -1,4 +1,4 @@
-import {onMounted, Ref, ref, toRaw} from 'vue'
+import {onMounted, Ref, ref, toRaw, watch} from 'vue'
 import {IDBPDatabase} from 'idb'
 import {watchDebounced} from "@vueuse/core";
 
@@ -9,38 +9,34 @@ export interface UseDBOptions {
     deep?: boolean
 }
 
-export type DBKey = string | number | Ref<string | number>
-
 type DBProvider = () => Promise<IDBPDatabase>
 
 export function useIndexedDB<T>(
-    key: DBKey,
+    key: Ref,
     defaultValue: T,
     dbProvider: DBProvider,
     options: UseDBOptions,
 ) {
     const data = ref<T>(defaultValue)
 
-    function getKey() {
-        return typeof key === 'object' && 'value' in key ? key.value : key
-    }
-
     async function load() {
         const db = await dbProvider()
-        const value = await db.get(options.store, getKey())
+        const value = await db.get(options.store, key.value)
         if (value !== undefined) {
             data.value = value
         } else {
+            data.value = defaultValue
             await save(defaultValue)
         }
     }
 
     async function save(value: T) {
         const db = await dbProvider()
-        await db.put(options.store, toRaw(value), getKey())
+        await db.put(options.store, toRaw(value), key.value)
     }
 
     onMounted(load)
+    watch(key, load)
     watchDebounced(data, save, {deep: options.deep, debounce: options.debounce})
 
     return data
