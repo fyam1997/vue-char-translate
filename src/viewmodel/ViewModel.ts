@@ -6,6 +6,7 @@ import {computed, Ref, ref} from "vue";
 import {FlattenJson, parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
 import {TranslationStorage} from "@/viewmodel/TranslationStorage.ts";
 import {APIConfigModel, APIConfigStorage} from "@/shared/apiconfig/APICondigStorage.ts";
+import {yieldTextWithDelay} from "@/viewmodel/AsyncUtils.ts";
 
 export class ViewModel {
     apiConfig: Ref<APIConfigModel>
@@ -91,15 +92,21 @@ export class ViewModel {
         this.loading.value = true
         this.setTranslatedJson({})
         this.loadingText.value = ""
-        const stream = await fetchCompletionResponse(
-            this.apiConfig.value,
-            this.rawJson.getSrcValue(),
-            this.prompt.value
-        )
-        for await (const event of stream) {
-            this.loadingText.value += event.choices[0].delta.content
+        try {
+            const stream = await fetchCompletionResponse(
+                this.apiConfig.value,
+                this.rawJson.getSrcValue(),
+                this.prompt.value
+            )
+            for await (const event of stream) {
+                this.loadingText.value += event.choices[0].delta.content
+            }
+            this.setTranslatedJson(parseJsonOrNull(this.loadingText.value))
+        } catch (e) {
+            this.snackbarMessages.value.push("Translation fail")
+            console.error(e)
         }
-        this.setTranslatedJson(parseJsonOrNull(this.loadingText.value))
+
         this.loadingText.value = ""
         this.loading.value = false
     }
