@@ -5,12 +5,17 @@ import ConfigPanel from "@/components/ConfigPanel.vue";
 import RawPanel from "@/components/RawPanel.vue";
 import ResultPanel from "@/components/ResultPanel.vue";
 import {useWindowSize} from "@vueuse/core";
+import {TranslationStorage} from "@/viewmodel/TranslationStorage.ts";
+import {APIConfigStorage} from "@/shared/apiconfig/APICondigStorage.ts";
 
-const viewModel = new ViewModel()
+const storage = new TranslationStorage()
+const apiConfigStorage = new APIConfigStorage()
+const viewModel = new ViewModel(storage, apiConfigStorage)
 provide("viewModel", viewModel)
+provide("apiConfigStorage", apiConfigStorage)
 
 onMounted(() => {
-  viewModel.loadCachedImage()
+  viewModel.loadDefaultPrompt()
 })
 
 const screenWidth = useWindowSize().width
@@ -18,7 +23,7 @@ const largeScreen = computed(() => screenWidth.value >= 950)
 const tab = ref("raw-panel")
 
 const shouldShowTranslated = computed(() => {
-  return viewModel.loading.value || !viewModel.translatedJson.isEmpty()
+  return true
 })
 
 watch(viewModel.loading, (after, before) => {

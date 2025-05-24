@@ -1,39 +1,25 @@
 import {useLocalStorage} from "@vueuse/core";
 import {isValidFile, LoadFileType, readFileContent} from "@/viewmodel/ReadFileContent.ts";
 import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts";
-import {APIConfigModel, fetchCompletionResponse} from "@/viewmodel/Translation.ts";
-import {computed, ref, triggerRef} from "vue";
+import {fetchCompletionResponse} from "@/viewmodel/Translation.ts";
+import {computed, Ref, ref} from "vue";
 import {FlattenJson, parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
-import {loadImage, saveImage} from "@/viewmodel/ImageCache.ts";
-import {transformAndFlatten} from "@/viewmodel/AsyncUtils.ts";
-import {LiveJSONParser} from "@/viewmodel/LiveJsonParser.ts";
+import {TranslationStorage} from "@/viewmodel/TranslationStorage.ts";
+import {APIConfigModel, APIConfigStorage} from "@/shared/apiconfig/APICondigStorage.ts";
 
 export class ViewModel {
-    image = ref<Uint8Array>(null)
+    apiConfig: Ref<APIConfigModel>
+    image: Ref<Uint8Array>
+
     imageSrc = computed(() => {
         if (!this.image.value) return null
         const blob = new Blob([this.image.value], {type: "image/png"})
         return URL.createObjectURL(blob)
     })
 
-    prompt = useLocalStorage("translation-prompt", "You are an expert translator who translates English to Traditional Chinese. You pay attention to style, formality, idioms, slang etc and try to convey it in the way a Traditional Chinese speaker would understand.\n" +
-        "BE MORE NATURAL.\n" +
-        "Specifically, you will be translating text from a role play charactor card.\n" +
-        "To aid you and provide context, You will be given a json of the charactor card. Return the json with the texts translated. \n" +
-        "DO NOT translate the json keys.\n" +
-        "DO NOT respond in markdown format like ```json ```.\n" +
-        "DO NOT give explanations.\n" +
-        "If it's already in Traditional Chineseor looks like gibberish, OUTPUT IT AS IT IS instead.\n" +
-        "Translate all charactor name.\n" +
-        "repalce all \"\" with 「」 in side json values.")
-    apiConfig = useLocalStorage<APIConfigModel>("api-config", {
-        baseURL: "",
-        apiKey: "",
-        model: "",
-    })
-
-    rawJson = new FlattenJson(useLocalStorage<object>("raw-json", {}))
-    translatedJson = new FlattenJson(useLocalStorage<object>("translated-json", {}))
+    prompt: Ref<string>
+    rawJson: FlattenJson
+    translatedJson: FlattenJson
     loadingText = ref("")
 
     snackbarMessages = ref<string[]>([])
@@ -46,8 +32,23 @@ export class ViewModel {
         return this.darkTheme.value ? 'md:light_mode' : 'md:dark_mode'
     })
 
-    async loadCachedImage() {
-        this.image.value = await loadImage()
+    constructor(
+        private storage: TranslationStorage,
+        private apiConfigStorage: APIConfigStorage,
+    ) {
+        this.apiConfig = this.apiConfigStorage.config
+        this.image = this.storage.image
+        this.prompt = this.storage.prompt
+        this.rawJson = new FlattenJson(this.storage.raw)
+        this.translatedJson = new FlattenJson(this.storage.translated)
+    }
+
+    async loadDefaultPrompt() {
+        // TODO since onMounted will try to read value from DB, if no value, it will save default value, the saving is happen after this
+        await new Promise((resolve) => setTimeout(resolve, 200))
+        if (!this.prompt.value) {
+            this.prompt.value = await (await fetch('/default_prompt.txt')).text()
+        }
     }
 
     async loadFile(files: File[] | File, loadFileType: LoadFileType) {
@@ -61,7 +62,6 @@ export class ViewModel {
         // ask for confirmation if target field is not empty
         if (png && (!this.image.value || confirm("Replace Image?"))) {
             this.image.value = png
-            await saveImage(png)
         }
         if (json && (this.rawJson.isEmpty() || confirm("Replace Character Spec Json?"))) {
             this.setRawJson(json)
@@ -83,33 +83,23 @@ export class ViewModel {
         }
         this.loading.value = true
         this.setTranslatedJson({})
-        const target = this.translatedJson.getSrcValue()
+        this.loadingText.value = ""
         const stream = await fetchCompletionResponse(
             this.apiConfig.value,
             this.rawJson.getSrcValue(),
             this.prompt.value
         )
-        let fullText = ""
-        const textStream = transformAndFlatten(stream, (event) => {
-            const chunk = event.choices[0].delta.content
-            fullText += chunk
-            triggerRef(this.translatedJson.src)
-            return chunk
-        })
-        try {
-            const parser = new LiveJSONParser(textStream)
-            await parser.readObject(target)
-        } catch (e) {
-            console.error(e)
+        for await (const event of stream) {
+            this.loadingText.value += event.choices[0].delta.content
         }
-        this.setTranslatedJson(parseJsonOrNull(fullText))
+        this.setTranslatedJson(parseJsonOrNull(this.loadingText.value))
+        this.loadingText.value = ""
         this.loading.value = false
     }
 
     async clearImage() {
         if (confirm('Clear Image?')) {
             this.image.value = null
-            await saveImage(null)
         }
     }
 
