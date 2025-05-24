@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {useTemplateRef} from "vue";
-import {useDropZone, useFileDialog} from "@vueuse/core";
+import {provide, useTemplateRef} from "vue";
+import {useDropZone, useFileDialog, UseFileDialogOptions} from "@vueuse/core";
 
 const props = defineProps<{
   accept: string
@@ -14,6 +14,8 @@ const {open, onChange, reset} = useFileDialog({
   directory: false,
   multiple: false,
 })
+
+provide<(localOptions?: Partial<UseFileDialogOptions>) => void>("openFileCallback", open)
 
 const dropZoneRef = useTemplateRef("dropZoneRef")
 
@@ -42,10 +44,10 @@ onChange(async (files) => {
 
 <template>
   <div ref="dropZoneRef" class="position-relative">
-    <slot name="default" :openFile="open"/>
+    <slot name="default"/>
 
     <Transition>
-      <h1 v-show="isOverDropZone" class="drop-target-overlay">
+      <h1 v-show="isOverDropZone" class="drop-target-overlay ma-4">
         Drop file here
       </h1>
     </Transition>

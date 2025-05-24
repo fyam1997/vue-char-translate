@@ -4,13 +4,18 @@ import {inject} from "vue";
 import {ViewModel} from "@/viewmodel/ViewModel.ts";
 import ImagePanel from "@/components/ImagePanel.vue";
 import RawJsonPanel from "@/components/RawJsonPanel.vue";
+import FileZone from "@/components/FileZone.vue";
 
 const viewModel = inject<ViewModel>("viewModel")
 
 </script>
 
 <template>
-  <div class="h-100 d-flex flex-column">
+  <FileZone
+      class="h-100 d-flex flex-column"
+      accept="image/png,application/json"
+      @onFileSelected="(file)=>viewModel.loadFile(file)"
+  >
     <div class="overflow-y-auto flex-grow-1 pa-4">
       <ImagePanel/>
       <v-divider class="mt-8 mb-8"/>
@@ -25,7 +30,7 @@ const viewModel = inject<ViewModel>("viewModel")
         text="Translate"
         :loading="viewModel.loading.value"
     />
-  </div>
+  </FileZone>
 </template>
 
 <style scoped>

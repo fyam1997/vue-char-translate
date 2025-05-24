@@ -19,7 +19,7 @@ onMounted(() => {
 })
 
 const screenWidth = useWindowSize().width
-const largeScreen = computed(() => screenWidth.value >= 950)
+const largeScreen = computed(() => screenWidth.value >= 1000)
 const tab = ref("raw-panel")
 
 const shouldShowTranslated = computed(() => {
@@ -66,7 +66,7 @@ watch(viewModel.loading, (after, before) => {
     </div>
 
     <div v-else class="w-100 h-100 d-flex flex-row ga-2 justify-center overflow-x-auto">
-      <ConfigPanel class="config-panel-large flex-grow-0"/>
+      <ConfigPanel class="config-panel-large flex-grow-1"/>
       <v-divider vertical class="mt-4 mb-4"/>
       <RawPanel class="content-panel-large flex-grow-1"/>
       <v-divider v-if="shouldShowTranslated" vertical class="mt-4 mb-4"/>
@@ -78,7 +78,7 @@ watch(viewModel.loading, (after, before) => {
 <style scoped>
 .config-panel-large {
   min-width: 300px;
-  max-width: 300px;
+  max-width: 400px;
 }
 
 .content-panel-large {

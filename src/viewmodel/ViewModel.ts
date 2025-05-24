@@ -1,11 +1,12 @@
 import {useLocalStorage} from "@vueuse/core";
-import {isValidFile, LoadFileType, readFileContent} from "@/viewmodel/ReadFileContent.ts";
+import {isValidFile, readFileContent} from "@/viewmodel/ReadFileContent.ts";
 import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts";
 import {fetchCompletionResponse} from "@/viewmodel/Translation.ts";
 import {computed, Ref, ref} from "vue";
 import {FlattenJson, parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
 import {TranslationStorage} from "@/viewmodel/TranslationStorage.ts";
 import {APIConfigModel, APIConfigStorage} from "@/shared/apiconfig/APICondigStorage.ts";
+import {yieldTextWithDelay} from "@/viewmodel/AsyncUtils.ts";
 
 export class ViewModel {
     apiConfig: Ref<APIConfigModel>
@@ -51,9 +52,10 @@ export class ViewModel {
         }
     }
 
-    async loadFile(files: File[] | File, loadFileType: LoadFileType) {
+    async loadFile(files: File[] | File) {
+        if (!files) return
         const file = Array.isArray(files) ? files[0] : files
-        if (!isValidFile(file, loadFileType)) {
+        if (!isValidFile(file)) {
             this.snackbarMessages.value.push("Illegal File")
             return
         }
@@ -81,18 +83,30 @@ export class ViewModel {
             this.snackbarMessages.value.push("Nothing to translate")
             return
         }
+        const apiConfig = this.apiConfig.value
+        if (!apiConfig.baseURL || !apiConfig.model) {
+            this.snackbarMessages.value.push("API configuration is empty")
+            return
+        }
+
         this.loading.value = true
         this.setTranslatedJson({})
         this.loadingText.value = ""
-        const stream = await fetchCompletionResponse(
-            this.apiConfig.value,
-            this.rawJson.getSrcValue(),
-            this.prompt.value
-        )
-        for await (const event of stream) {
-            this.loadingText.value += event.choices[0].delta.content
+        try {
+            const stream = await fetchCompletionResponse(
+                this.apiConfig.value,
+                this.rawJson.getSrcValue(),
+                this.prompt.value
+            )
+            for await (const event of stream) {
+                this.loadingText.value += event.choices[0].delta.content
+            }
+            this.setTranslatedJson(parseJsonOrNull(this.loadingText.value))
+        } catch (e) {
+            this.snackbarMessages.value.push("Translation fail")
+            console.error(e)
         }
-        this.setTranslatedJson(parseJsonOrNull(this.loadingText.value))
+
         this.loadingText.value = ""
         this.loading.value = false
     }

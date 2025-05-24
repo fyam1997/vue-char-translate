@@ -2,24 +2,14 @@ import {getMetadata} from "meta-png";
 import {Base64} from "js-base64";
 import {parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
 
-export function isValidFile(file: File, loadFileType: LoadFileType): boolean {
-    const allowedTypes = getAllowedTypes(loadFileType)
+export function isValidFile(file: File): boolean {
+    const allowedTypes = ['image/png', 'application/json']
     const fileTypeValid = allowedTypes.includes(file.type)
 
     const maxSizeInMB = 20
     const fileSizeValid = file.size <= maxSizeInMB * 1024 * 1024
 
     return fileTypeValid && fileSizeValid
-}
-
-function getAllowedTypes(loadFileType: LoadFileType): string[] {
-    switch (loadFileType) {
-        case LoadFileType.JSON:
-            return ['application/json'];
-        case LoadFileType.PNG:
-        default:
-            return ['image/png'];
-    }
 }
 
 export async function readFileContent(file: File): Promise<FileContent> {
@@ -48,11 +38,6 @@ async function readPngContent(file: File): Promise<FileContent> {
         json: parseJsonOrNull(decodedJson),
         png: uint8Array,
     }
-}
-
-export enum LoadFileType {
-    JSON,
-    PNG,
 }
 
 interface FileContent {

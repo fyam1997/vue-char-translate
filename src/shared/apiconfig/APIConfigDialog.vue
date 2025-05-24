@@ -44,7 +44,6 @@ function deleteConfig() {
   }
 }
 
-
 </script>
 
 <template>
@@ -57,7 +56,7 @@ function deleteConfig() {
     <template v-slot:activator>
       <v-btn
           class="text-none"
-          append-icon="md:settings"
+          prepend-icon="md:settings"
           variant="outlined"
           @click="showDialog=true"
           text="Config API"
