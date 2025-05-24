@@ -5,9 +5,14 @@ import ConfigPanel from "@/components/ConfigPanel.vue";
 import RawPanel from "@/components/RawPanel.vue";
 import ResultPanel from "@/components/ResultPanel.vue";
 import {useWindowSize} from "@vueuse/core";
+import {TranslationStorage} from "@/viewmodel/TranslationStorage.ts";
+import {APIConfigStorage} from "@/shared/apiconfig/APICondigStorage.ts";
 
-const viewModel = new ViewModel()
+const storage = new TranslationStorage()
+const apiConfigStorage = new APIConfigStorage()
+const viewModel = new ViewModel(storage, apiConfigStorage)
 provide("viewModel", viewModel)
+provide("apiConfigStorage", apiConfigStorage)
 
 onMounted(() => {
   viewModel.loadDefaultPrompt()

@@ -1,15 +1,16 @@
 import {useLocalStorage} from "@vueuse/core";
 import {isValidFile, LoadFileType, readFileContent} from "@/viewmodel/ReadFileContent.ts";
 import {downloadImageFile, downloadJsonFile} from "@/viewmodel/DownloadResult.ts";
-import {APIConfigModel, fetchCompletionResponse} from "@/viewmodel/Translation.ts";
-import {computed, ref, triggerRef} from "vue";
+import {fetchCompletionResponse} from "@/viewmodel/Translation.ts";
+import {computed, Ref, ref} from "vue";
 import {FlattenJson, parseJsonOrNull} from "@/viewmodel/JsonUtils.ts";
 import {TranslationStorage} from "@/viewmodel/TranslationStorage.ts";
+import {APIConfigModel, APIConfigStorage} from "@/shared/apiconfig/APICondigStorage.ts";
 
 export class ViewModel {
-    storage = new TranslationStorage()
+    apiConfig: Ref<APIConfigModel>
+    image: Ref<Uint8Array>
 
-    image = this.storage.image
     imageSrc = computed(() => {
         if (!this.image.value) return null
         const blob = new Blob([this.image.value], {type: "image/png"})
@@ -17,14 +18,8 @@ export class ViewModel {
     })
 
     prompt = useLocalStorage("translation-prompt", "")
-    apiConfig = useLocalStorage<APIConfigModel>("api-config", {
-        baseURL: "",
-        apiKey: "",
-        model: "",
-    })
-
-    rawJson = new FlattenJson(this.storage.raw)
-    translatedJson = new FlattenJson(this.storage.translated)
+    rawJson: FlattenJson
+    translatedJson: FlattenJson
     loadingText = ref("")
 
     snackbarMessages = ref<string[]>([])
@@ -36,6 +31,16 @@ export class ViewModel {
     toggleThemeIcon = computed(() => {
         return this.darkTheme.value ? 'md:light_mode' : 'md:dark_mode'
     })
+
+    constructor(
+        private storage: TranslationStorage,
+        private apiConfigStorage: APIConfigStorage,
+    ) {
+        this.apiConfig = this.apiConfigStorage.config
+        this.image = this.storage.image
+        this.rawJson = new FlattenJson(this.storage.raw)
+        this.translatedJson = new FlattenJson(this.storage.translated)
+    }
 
     async loadDefaultPrompt() {
         if (!this.prompt.value) {

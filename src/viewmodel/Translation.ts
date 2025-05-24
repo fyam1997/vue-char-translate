@@ -1,10 +1,5 @@
 import OpenAI from "openai";
-
-export interface APIConfigModel {
-    baseURL: string
-    apiKey: string
-    model: string
-}
+import {APIConfigModel} from "@/shared/apiconfig/APICondigStorage.ts";
 
 export async function fetchCompletionResponse(
     apiConfig: APIConfigModel,
