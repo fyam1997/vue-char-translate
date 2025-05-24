@@ -47,7 +47,7 @@ export class ViewModel {
         // TODO since onMounted will try to read value from DB, if no value, it will save default value, the saving is happen after this
         await new Promise((resolve) => setTimeout(resolve, 200))
         if (!this.prompt.value) {
-            this.prompt.value = await (await fetch('/default_prompt.txt')).text()
+            this.prompt.value = await (await fetch('./default_prompt.txt')).text()
         }
     }
 
